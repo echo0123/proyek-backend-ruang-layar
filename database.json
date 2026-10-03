@@ -1,0 +1,58 @@
+{
+  "users": [
+    {
+      "id": 999,
+      "name": "Admin Ruang Layar",
+      "email": "admin@ruanglayar.com",
+      "password": "$2b$10$l/Nyfad3PmdSy3xXgIcfn.s915CV.JE6mHTo9lSWOhR0HqENA4iaO",
+      "isAdmin": true,
+      "watchlist": []
+    },
+    {
+      "id": 1791042234965,
+      "name": "enmaros01",
+      "email": "enmaros01@gmail.com",
+      "password": "$2b$10$3BNPlzIhqhXRtjF68LacNOVfxJ24z4bp0HznUWmo5443SAWDyMi.q",
+      "isAdmin": false,
+      "watchlist": []
+    }
+  ],
+  "movies": [
+    {
+      "id": 1,
+      "title": "Chronicles of Neo",
+      "genre": "Sci-Fi",
+      "rating": 8.8,
+      "desc": "Petualangan futuristik menembus dimensi ruang dan waktu demi menyelamatkan peradaban terakhir manusia.",
+      "director": "Aria Kusuma",
+      "cast": "Reza Rahadian, Marissa Anita",
+      "image": "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&q=80&w=600",
+      "reviews": [
+        {
+          "user": "Budi Santoso",
+          "rating": 5,
+          "comment": "Efek visualnya luar biasa untuk standar film lokal!",
+          "date": "2026-10-01"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Shadows of Jakarta",
+      "genre": "Drama",
+      "rating": 8.2,
+      "desc": "Misteri konspirasi tingkat tinggi di balik gemerlap malam ibu kota yang mengungkap rahasia kelam.",
+      "director": "Dimas Anggara",
+      "cast": "Chicco Jerikho, Laura Basuki",
+      "image": "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&q=80&w=600",
+      "reviews": [
+        {
+          "user": "Siti Rahma",
+          "rating": 4,
+          "comment": "Alur ceritanya menegangkan dari awal sampai akhir.",
+          "date": "2026-10-02"
+        }
+      ]
+    }
+  ]
+}

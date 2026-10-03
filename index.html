@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruang Layar - Portal Ulasan & Direktori Film Terkini di Indonesia</title>
+    
+    <!-- SEO META TAGS -->
+    <meta name="description" content="Ruang Layar adalah portal direktori film, jadwal bioskop resmi, dan ulasan komunitas pencinta sinema nomor satu di Indonesia. Temukan rating, sinopsis, dan ulasan mendalam.">
+    <meta name="keywords" content="ulasan film, bioskop indonesia, review film, jadwal bioskop, direktori film, ruang layar">
+    <meta name="author" content="Ruang Layar Official">
+    <meta name="robots" content="index, follow">
+
+    <!-- OPEN GRAPH (OG) TAGS -->
+    <meta property="og:title" content="Ruang Layar - Portal Ulasan & Direktori Film Terkini">
+    <meta property="og:description" content="Jelajahi dunia film, baca ulasan mendalam, dan berikan rating film favoritmu di Ruang Layar.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&q=80&w=1200">
+
+    <!-- SCHEMA.ORG JSON-LD -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Ruang Layar",
+      "url": "http://localhost:3000",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "http://localhost:3000/?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darker: '#030712',
+                        carddark: '#111827',
+                        neoncyan: '#06b6d4',
+                        neonpurple: '#8b5cf6',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-darker text-gray-100 font-sans antialiased selection:bg-cyan-500 selection:text-white">
+
+    <!-- NAVBAR -->
+    <nav class="sticky top-0 z-40 bg-darker/90 backdrop-blur-md border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="location.reload()">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-purple-600 flex items-center justify-center shadow-lg shadow-cyan-500/30">
+                        <i class="fa-solid fa-film text-white text-lg"></i>
+                    </div>
+                    <span class="text-2xl font-black tracking-wider bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
+                        RUANG LAYAR
+                    </span>
+                </div>
+
+                <div class="hidden md:flex items-center space-x-6 text-sm font-medium">
+                    <a href="#" class="text-cyan-400 hover:text-cyan-300 transition">Beranda</a>
+                    <a href="#now-playing" class="text-gray-300 hover:text-cyan-400 transition">Katalog</a>
+                    <div id="nav-admin-link"></div>
+                    <div id="nav-watchlist-link"></div>
+                </div>
+
+                <!-- Auth / Profile -->
+                <div class="hidden md:flex items-center space-x-4" id="auth-container">
+                    <button onclick="openModal('login')" class="px-4 py-2 text-sm font-semibold text-gray-300 hover:text-white transition">Masuk</button>
+                    <button onclick="openModal('register')" class="px-5 py-2 text-sm font-semibold rounded-xl bg-gradient-to-r from-cyan-500 to-purple-600 text-white shadow-lg shadow-cyan-500/20 transition">Daftar</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <header class="relative overflow-hidden py-20 lg:py-28 text-center">
+        <div class="max-w-7xl mx-auto px-4 relative z-10">
+            <span class="inline-flex items-center gap-1.5 py-1.5 px-4 rounded-full text-xs font-semibold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 mb-6">
+                <i class="fa-solid fa-fire text-amber-400"></i> Portal Ulasan & Direktori Film Resmi
+            </span>
+            <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight max-w-3xl mx-auto leading-tight">
+                Jelajahi Dunia Film di <span class="bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">Ruang Layar</span>
+            </h1>
+            <p class="mt-4 text-base sm:text-lg text-gray-400 max-w-xl mx-auto">
+                Cari film favoritmu, simpan ke Watchlist, baca ulasan, dan berikan rating terbaikmu.
+            </p>
+
+            <!-- Search Bar -->
+            <div class="mt-8 max-w-xl mx-auto">
+                <div class="relative flex items-center">
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 text-gray-400"></i>
+                    <input type="text" id="search-input" oninput="filterMovies()" placeholder="Cari judul film..." class="w-full pl-12 pr-4 py-4 bg-carddark/90 border border-gray-800 rounded-2xl text-sm focus:outline-none focus:border-cyan-500 text-white placeholder-gray-500 shadow-xl">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- CATALOGUE & GENRE FILTER -->
+    <section id="now-playing" class="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 gap-4">
+            <div>
+                <h2 class="text-2xl sm:text-3xl font-bold tracking-tight">Daftar Film & Bioskop</h2>
+                <p class="text-gray-400 text-sm mt-1">Pilih film untuk melihat detail, ulasan, atau menyimpan ke Watchlist.</p>
+            </div>
+            <!-- Genre Filter Tabs -->
+            <div class="flex flex-wrap gap-2" id="genre-filters">
+                <button onclick="filterGenre('All')" class="px-4 py-1.5 rounded-xl text-xs font-semibold bg-cyan-500 text-white transition genre-btn active">Semua</button>
+                <button onclick="filterGenre('Sci-Fi')" class="px-4 py-1.5 rounded-xl text-xs font-semibold bg-carddark border border-gray-800 text-gray-300 hover:border-cyan-500 transition genre-btn">Sci-Fi</button>
+                <button onclick="filterGenre('Drama')" class="px-4 py-1.5 rounded-xl text-xs font-semibold bg-carddark border border-gray-800 text-gray-300 hover:border-cyan-500 transition genre-btn">Drama</button>
+                <button onclick="filterGenre('Fantasy')" class="px-4 py-1.5 rounded-xl text-xs font-semibold bg-carddark border border-gray-800 text-gray-300 hover:border-cyan-500 transition genre-btn">Fantasy</button>
+                <button onclick="filterGenre('Horror')" class="px-4 py-1.5 rounded-xl text-xs font-semibold bg-carddark border border-gray-800 text-gray-300 hover:border-cyan-500 transition genre-btn">Horror</button>
+            </div>
+        </div>
+
+        <!-- Movie Grid -->
+        <div id="movie-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Rendered dynamically -->
+        </div>
+    </section>
+
+    <!-- WATCHLIST MODAL -->
+    <div id="watchlist-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden p-4 overflow-y-auto">
+        <div class="bg-carddark border border-gray-800 w-full max-w-4xl rounded-3xl p-6 sm:p-8 relative shadow-2xl max-h-[90vh] overflow-y-auto">
+            <button onclick="closeWatchlistModal()" class="absolute top-6 right-6 text-gray-400 hover:text-white z-10">
+                <i class="fa-solid fa-xmark text-2xl"></i>
+            </button>
+            <h2 class="text-2xl font-bold mb-6 flex items-center gap-2"><i class="fa-solid fa-bookmark text-cyan-400"></i> Watchlist Saya</h2>
+            <div id="watchlist-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Watchlist items -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN MODAL -->
+    <div id="admin-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden p-4 overflow-y-auto">
+        <div class="bg-carddark border border-gray-800 w-full max-w-3xl rounded-3xl p-6 sm:p-8 relative shadow-2xl max-h-[90vh] overflow-y-auto">
+            <button onclick="closeAdminModal()" class="absolute top-6 right-6 text-gray-400 hover:text-white z-10">
+                <i class="fa-solid fa-xmark text-2xl"></i>
+            </button>
+            <h2 class="text-2xl font-bold mb-6 flex items-center gap-2"><i class="fa-solid fa-user-shield text-purple-400"></i> Admin Dashboard</h2>
+            
+            <!-- TMDb API Import Form -->
+            <div class="bg-darker p-4 rounded-2xl border border-gray-800 mb-6">
+                <h3 class="font-bold text-sm text-cyan-400 mb-2"><i class="fa-solid fa-cloud-arrow-down"></i> Impor Otomatis dari TMDb API</h3>
+                <div class="flex gap-2">
+                    <input type="text" id="tmdb-query" placeholder="Ketik judul film (mis: Avatar, Interstellar)..." class="flex-1 p-3 bg-carddark text-xs text-white rounded-xl border border-gray-700 focus:outline-none focus:border-cyan-500">
+                    <button onclick="importFromTMDb()" class="px-5 py-2 bg-cyan-500 hover:bg-cyan-400 text-white text-xs font-semibold rounded-xl transition">Impor</button>
+                </div>
+            </div>
+
+            <!-- Manual Add Movie Form -->
+            <form onsubmit="handleAddMovie(event)" class="space-y-4 bg-darker p-4 rounded-2xl border border-gray-800">
+                <h3 class="font-bold text-sm text-gray-200">Tambah Film Manual</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <input type="text" id="m-title" required placeholder="Judul Film" class="p-3 bg-carddark text-xs text-white rounded-xl border border-gray-700">
+                    <input type="text" id="m-genre" required placeholder="Genre (mis: Action • Sci-Fi)" class="p-3 bg-carddark text-xs text-white rounded-xl border border-gray-700">
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <input type="text" id="m-director" placeholder="Sutradara" class="p-3 bg-carddark text-xs text-white rounded-xl border border-gray-700">
+                    <input type="text" id="m-cast" placeholder="Pemeran" class="p-3 bg-carddark text-xs text-white rounded-xl border border-gray-700">
+                </div>
+                <input type="text" id="m-image" placeholder="URL Poster Gambar" class="w-full p-3 bg-carddark text-xs text-white rounded-xl border border-gray-700">
+                <textarea id="m-desc" required placeholder="Sinopsis singkat..." class="w-full p-3 bg-carddark text-xs text-white rounded-xl border border-gray-700" rows="2"></textarea>
+                <button type="submit" class="px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-purple-600 text-white text-xs font-semibold rounded-xl">Simpan Film Baru</button>
+            </form>
+
+            <div class="mt-8">
+                <h3 class="font-bold text-sm mb-4">Kelola Film Terdaftar</h3>
+                <div id="admin-movie-list" class="space-y-2 max-h-40 overflow-y-auto pr-2">
+                    <!-- Admin Movie List -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MOVIE DETAIL MODAL -->
+    <div id="detail-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden p-4 overflow-y-auto">
+        <div class="bg-carddark border border-gray-800 w-full max-w-3xl rounded-3xl p-6 sm:p-8 relative shadow-2xl max-h-[90vh] overflow-y-auto">
+            <button onclick="closeDetailModal()" class="absolute top-6 right-6 text-gray-400 hover:text-white z-10">
+                <i class="fa-solid fa-xmark text-2xl"></i>
+            </button>
+            <div id="modal-content">
+                <!-- Dynamic Content -->
+            </div>
+        </div>
+    </div>
+
+    <!-- AUTH MODAL -->
+    <div id="auth-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm hidden">
+        <div class="bg-carddark border border-gray-800 w-full max-w-md rounded-3xl p-8 relative shadow-2xl">
+            <button onclick="closeModal()" class="absolute top-6 right-6 text-gray-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <div class="flex space-x-4 border-b border-gray-800 pb-4 mb-6">
+                <button onclick="switchTab('login')" id="tab-login" class="font-bold text-lg text-cyan-400 border-b-2 border-cyan-400 pb-1">Masuk</button>
+                <button onclick="switchTab('register')" id="tab-register" class="font-bold text-lg text-gray-400 pb-1">Daftar Akun</button>
+            </div>
+            <form id="form-login" class="space-y-4" onsubmit="handleAuth(event, 'login')">
+                <input type="email" required placeholder="Email" class="w-full px-4 py-3 bg-darker border border-gray-800 rounded-xl text-sm text-white focus:border-cyan-500 focus:outline-none">
+                <input type="password" required placeholder="Password" class="w-full px-4 py-3 bg-darker border border-gray-800 rounded-xl text-sm text-white focus:border-cyan-500 focus:outline-none">
+                <button type="submit" class="w-full py-3 bg-gradient-to-r from-cyan-500 to-purple-600 text-white font-semibold rounded-xl">Masuk</button>
+            </form>
+            <form id="form-register" class="space-y-4 hidden" onsubmit="handleAuth(event, 'register')">
+                <input type="text" required placeholder="Nama Lengkap" class="w-full px-4 py-3 bg-darker border border-gray-800 rounded-xl text-sm text-white focus:border-cyan-500 focus:outline-none">
+                <input type="email" required placeholder="Email" class="w-full px-4 py-3 bg-darker border border-gray-800 rounded-xl text-sm text-white focus:border-cyan-500 focus:outline-none">
+                <input type="password" required placeholder="Password" class="w-full px-4 py-3 bg-darker border border-gray-800 rounded-xl text-sm text-white focus:border-cyan-500 focus:outline-none">
+                <button type="submit" class="w-full py-3 bg-gradient-to-r from-cyan-500 to-purple-600 text-white font-semibold rounded-xl">Daftar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-gray-800 mt-20 py-10 bg-darker text-center text-xs text-gray-500">
+        <p>&copy; 2026 Ruang Layar. All Rights Reserved. Portal Ulasan & Direktori Film Legal Indonesia.</p>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // Konfigurasi URL Backend (Ubah saat sudah dideploy ke publik, misal: 'https://api.ruanglayar.com')
+        const API_URL = 'http://localhost:3000';
+
+        let allMovies = [];
+        let currentGenre = 'All';
+        let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+
+        async function fetchMovies() {
+            try {
+                const res = await fetch(`${API_URL}/api/movies`);
+                allMovies = await res.json();
+                displayMovies(allMovies);
+            } catch (err) {
+                console.error('Gagal mengambil data film:', err);
+            }
+        }
+
+        function displayMovies(movies) {
+            const grid = document.getElementById('movie-grid');
+            grid.innerHTML = '';
+            if (movies.length === 0) {
+                grid.innerHTML = `<p class="col-span-full text-center text-gray-500 py-10">Film tidak ditemukan.</p>`;
+                return;
+            }
+
+            movies.forEach(movie => {
+                const isWatchlisted = currentUser && currentUser.watchlist && currentUser.watchlist.includes(movie.id);
+                grid.innerHTML += `
+                    <div class="bg-carddark rounded-2xl overflow-hidden border border-gray-800/80 hover:border-cyan-500/50 transition group flex flex-col justify-between">
+                        <div onclick="openDetail(${movie.id})" class="relative aspect-[2/3] overflow-hidden bg-gray-950 cursor-pointer">
+                            <img src="${movie.image}" alt="${movie.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                            <span class="absolute top-3 left-3 z-20 px-2.5 py-1 bg-black/60 backdrop-blur-md rounded-lg text-xs font-bold text-amber-400 flex items-center gap-1 border border-white/10">
+                                <i class="fa-solid fa-star"></i> ${movie.rating}
+                            </span>
+                        </div>
+                        <div class="p-5 flex-1 flex flex-col justify-between">
+                            <div>
+                                <span class="text-xs text-cyan-400 font-semibold mb-1 block">${movie.genre}</span>
+                                <h3 onclick="openDetail(${movie.id})" class="font-bold text-lg text-white group-hover:text-cyan-400 transition cursor-pointer">${movie.title}</h3>
+                                <p class="text-gray-400 text-xs mt-2 line-clamp-2">${movie.desc}</p>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-800 flex justify-between items-center">
+                                <button onclick="openDetail(${movie.id})" class="text-xs text-cyan-400 font-semibold hover:underline">Detail & Ulasan</button>
+                                ${currentUser ? `
+                                    <button onclick="toggleWatchlist(${movie.id})" class="text-xs px-3 py-1.5 rounded-lg border ${isWatchlisted ? 'bg-cyan-500 text-white border-cyan-500' : 'border-gray-700 text-gray-300 hover:border-cyan-400'}">
+                                        <i class="fa-solid fa-bookmark"></i> ${isWatchlisted ? 'Disimpan' : 'Watchlist'}
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function filterGenre(genre) {
+            currentGenre = genre;
+            document.querySelectorAll('.genre-btn').forEach(btn => {
+                btn.className = "px-4 py-1.5 rounded-xl text-xs font-semibold bg-carddark border border-gray-800 text-gray-300 hover:border-cyan-500 transition genre-btn";
+            });
+            event.target.className = "px-4 py-1.5 rounded-xl text-xs font-semibold bg-cyan-500 text-white transition genre-btn";
+            applyFilters();
+        }
+
+        function filterMovies() {
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            let filtered = allMovies.filter(m => {
+                const matchQuery = m.title.toLowerCase().includes(query) || m.desc.toLowerCase().includes(query);
+                const matchGenre = currentGenre === 'All' || m.genre.includes(currentGenre);
+                return matchQuery && matchGenre;
+            });
+            displayMovies(filtered);
+        }
+
+        async function openDetail(id) {
+            try {
+                const res = await fetch(`${API_URL}/api/movies/${id}`);
+                const movie = await res.json();
+                const isWatchlisted = currentUser && currentUser.watchlist && currentUser.watchlist.includes(movie.id);
+
+                let reviewsHTML = movie.reviews.length === 0 ? `<p class="text-xs text-gray-500">Belum ada ulasan.</p>` : '';
+                movie.reviews.forEach(r => {
+                    reviewsHTML += `
+                        <div class="bg-darker p-4 rounded-xl border border-gray-800 mb-3">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="font-bold text-sm text-cyan-400">${r.user}</span>
+                                <span class="text-xs text-amber-400"><i class="fa-solid fa-star"></i> ${r.rating}/5</span>
+                            </div>
+                            <p class="text-xs text-gray-300">${r.comment}</p>
+                            <span class="text-[10px] text-gray-500 mt-2 block">${r.date}</span>
+                        </div>
+                    `;
+                });
+
+                const reviewFormHTML = currentUser ? `
+                    <form onsubmit="submitReview(event, ${movie.id})" class="mt-6 space-y-3 bg-darker p-4 rounded-2xl border border-gray-800">
+                        <h4 class="font-bold text-sm text-gray-200">Tulis Ulasan Kamu</h4>
+                        <div class="flex items-center gap-2">
+                            <label class="text-xs text-gray-400">Rating:</label>
+                            <select id="review-rating" class="bg-carddark text-xs text-white p-2 rounded-lg border border-gray-700">
+                                <option value="5">★★★★★ (5/5)</option>
+                                <option value="4">★★★★☆ (4/5)</option>
+                                <option value="3">★★★☆☆ (3/5)</option>
+                                <option value="2">★★☆☆☆ (2/5)</option>
+                                <option value="1">★☆☆☆☆ (1/5)</option>
+                            </select>
+                        </div>
+                        <textarea id="review-comment" required placeholder="Tuliskan pendapatmu tentang film ini..." class="w-full p-3 bg-carddark text-xs text-white rounded-xl border border-gray-700 focus:outline-none focus:border-cyan-500" rows="3"></textarea>
+                        <button type="submit" class="px-4 py-2 bg-cyan-500 text-white text-xs font-semibold rounded-xl">Kirim Ulasan</button>
+                    </form>
+                ` : `
+                    <p class="text-xs text-amber-400 mt-4">Silakan <button onclick="openModal('login')" class="underline font-bold">Masuk</button> terlebih dahulu untuk menulis ulasan.</p>
+                `;
+
+                document.getElementById('modal-content').innerHTML = `
+                    <div class="flex flex-col md:flex-row gap-6">
+                        <img src="${movie.image}" class="w-full md:w-1/3 aspect-[2/3] object-cover rounded-2xl border border-gray-800">
+                        <div class="flex-1">
+                            <span class="text-xs text-cyan-400 font-semibold">${movie.genre}</span>
+                            <h2 class="text-2xl font-bold text-white mt-1">${movie.title}</h2>
+                            <p class="text-xs text-amber-400 mt-2 font-bold"><i class="fa-solid fa-star"></i> ${movie.rating} / 10</p>
+                            <p class="text-gray-300 text-sm mt-4">${movie.desc}</p>
+                            
+                            <div class="mt-4 space-y-1 text-xs text-gray-400">
+                                <p><strong class="text-gray-200">Sutradara:</strong> ${movie.director}</p>
+                                <p><strong class="text-gray-200">Pemeran:</strong> ${movie.cast}</p>
+                            </div>
+
+                            ${currentUser ? `
+                                <button onclick="toggleWatchlist(${movie.id})" class="mt-6 px-4 py-2 text-xs font-semibold rounded-xl border ${isWatchlisted ? 'bg-cyan-500 text-white border-cyan-500' : 'border-gray-700 text-gray-300 hover:border-cyan-400'}">
+                                    <i class="fa-solid fa-bookmark"></i> ${isWatchlisted ? 'Hapus dari Watchlist' : 'Simpan ke Watchlist'}
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+
+                    <div class="mt-8 border-t border-gray-800 pt-6">
+                        <h3 class="font-bold text-lg mb-4">Ulasan Komunitas</h3>
+                        <div class="max-h-48 overflow-y-auto space-y-2 pr-2">${reviewsHTML}</div>
+                        ${reviewFormHTML}
+                    </div>
+                `;
+
+                document.getElementById('detail-modal').classList.remove('hidden');
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function closeDetailModal() {
+            document.getElementById('detail-modal').classList.add('hidden');
+        }
+
+        async function toggleWatchlist(movieId) {
+            if (!currentUser) { alert('Silakan masuk terlebih dahulu.'); return; }
+            try {
+                const res = await fetch(`${API_URL}/api/watchlist`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: currentUser.email, movieId })
+                });
+                const result = await res.json();
+                if (res.ok) {
+                    currentUser.watchlist = result.watchlist;
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    alert(result.message);
+                    fetchMovies();
+                    if (!document.getElementById('detail-modal').classList.contains('hidden')) {
+                        openDetail(movieId);
+                    }
+                    if (!document.getElementById('watchlist-modal').classList.contains('hidden')) {
+                        openWatchlistModal();
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function openWatchlistModal() {
+            try {
+                const res = await fetch(`${API_URL}/api/watchlist/${currentUser.email}`);
+                const movies = await res.json();
+                const grid = document.getElementById('watchlist-grid');
+                grid.innerHTML = '';
+
+                if (movies.length === 0) {
+                    grid.innerHTML = `<p class="col-span-full text-center text-gray-500 py-10">Watchlist kamu masih kosong.</p>`;
+                } else {
+                    movies.forEach(movie => {
+                        grid.innerHTML += `
+                            <div class="bg-darker rounded-2xl overflow-hidden border border-gray-800 p-4 flex gap-4 items-center">
+                                <img src="${movie.image}" class="w-20 h-28 object-cover rounded-xl">
+                                <div class="flex-1">
+                                    <h4 class="font-bold text-sm text-white">${movie.title}</h4>
+                                    <span class="text-xs text-cyan-400 block mt-1">${movie.genre}</span>
+                                    <button onclick="toggleWatchlist(${movie.id})" class="mt-3 text-xs text-red-400 hover:underline">Hapus</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                document.getElementById('watchlist-modal').classList.remove('hidden');
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function closeWatchlistModal() {
+            document.getElementById('watchlist-modal').classList.add('hidden');
+        }
+
+        function openAdminModal() {
+            renderAdminMovieList();
+            document.getElementById('admin-modal').classList.remove('hidden');
+        }
+
+        function closeAdminModal() {
+            document.getElementById('admin-modal').classList.add('hidden');
+            fetchMovies();
+        }
+
+        function renderAdminMovieList() {
+            const list = document.getElementById('admin-movie-list');
+            list.innerHTML = '';
+            allMovies.forEach(m => {
+                list.innerHTML += `
+                    <div class="flex justify-between items-center bg-carddark p-3 rounded-xl border border-gray-800 text-xs">
+                        <span class="font-bold text-white">${m.title}</span>
+                        <button onclick="deleteMovie(${m.id})" class="px-3 py-1 bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white rounded-lg transition">Hapus</button>
+                    </div>
+                `;
+            });
+        }
+
+        async function handleAddMovie(event) {
+            event.preventDefault();
+            const payload = {
+                title: document.getElementById('m-title').value,
+                genre: document.getElementById('m-genre').value,
+                director: document.getElementById('m-director').value,
+                cast: document.getElementById('m-cast').value,
+                image: document.getElementById('m-image').value,
+                desc: document.getElementById('m-desc').value,
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/api/admin/movies`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await res.json();
+                if (res.ok) {
+                    alert(result.message);
+                    event.target.reset();
+                    fetchMovies();
+                    renderAdminMovieList();
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function deleteMovie(id) {
+            if (!confirm('Yakin ingin menghapus film ini?')) return;
+            try {
+                const res = await fetch(`${API_URL}/api/admin/movies/${id}`, { method: 'DELETE' });
+                const result = await res.json();
+                if (res.ok) {
+                    alert(result.message);
+                    fetchMovies();
+                    renderAdminMovieList();
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function importFromTMDb() {
+            const query = document.getElementById('tmdb-query').value;
+            if (!query) { alert('Masukkan judul film terlebih dahulu.'); return; }
+            try {
+                const res = await fetch(`${API_URL}/api/admin/import-tmdb`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query })
+                });
+                const result = await res.json();
+                if (res.ok) {
+                    alert(result.message);
+                    document.getElementById('tmdb-query').value = '';
+                    fetchMovies();
+                    renderAdminMovieList();
+                } else {
+                    alert(result.error);
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Gagal mengimpor dari TMDb.');
+            }
+        }
+
+        function openModal(mode) {
+            document.getElementById('auth-modal').classList.remove('hidden');
+            switchTab(mode);
+        }
+        function closeModal() {
+            document.getElementById('auth-modal').classList.add('hidden');
+        }
+        function switchTab(mode) {
+            const loginTab = document.getElementById('tab-login');
+            const regTab = document.getElementById('tab-register');
+            const loginForm = document.getElementById('form-login');
+            const regForm = document.getElementById('form-register');
+            if (mode === 'login') {
+                loginTab.className = "font-bold text-lg text-cyan-400 border-b-2 border-cyan-400 pb-1";
+                regTab.className = "font-bold text-lg text-gray-400 pb-1";
+                loginForm.classList.remove('hidden');
+                regForm.classList.add('hidden');
+            } else {
+                regTab.className = "font-bold text-lg text-cyan-400 border-b-2 border-cyan-400 pb-1";
+                loginTab.className = "font-bold text-lg text-gray-400 pb-1";
+                regForm.classList.remove('hidden');
+                loginForm.classList.add('hidden');
+            }
+        }
+
+        async function handleAuth(event, type) {
+            event.preventDefault();
+            const inputs = event.target.querySelectorAll('input');
+            const data = type === 'register' ? { name: inputs[0].value, email: inputs[1].value, password: inputs[2].value } : { email: inputs[0].value, password: inputs[1].value };
+            const endpoint = type === 'register' ? `${API_URL}/api/register` : `${API_URL}/api/login`;
+
+            try {
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                if (!res.ok) { alert(result.error); return; }
+                alert(result.message);
+                closeModal();
+                
+                currentUser = result.user;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                updateNavbarUser();
+                fetchMovies();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function submitReview(event, movieId) {
+            event.preventDefault();
+            const rating = document.getElementById('review-rating').value;
+            const comment = document.getElementById('review-comment').value;
+            const userName = currentUser ? currentUser.name : 'Anonim';
+
+            try {
+                const res = await fetch(`${API_URL}/api/movies/${movieId}/reviews`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userName, rating, comment })
+                });
+                const result = await res.json();
+                if (res.ok) {
+                    alert(result.message);
+                    openDetail(movieId);
+                    fetchMovies();
+                } else {
+                    alert(result.error);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function updateNavbarUser() {
+            const container = document.getElementById('auth-container');
+            const watchlistLink = document.getElementById('nav-watchlist-link');
+            const adminLink = document.getElementById('nav-admin-link');
+
+            if (currentUser) {
+                const initials = currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+                container.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-full bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-400 font-bold text-sm">${initials}</div>
+                        <span class="text-sm font-semibold text-gray-200">${currentUser.name}</span>
+                        <button onclick="logout()" class="text-xs text-red-400 hover:underline ml-2">Keluar</button>
+                    </div>
+                `;
+                watchlistLink.innerHTML = `<button onclick="openWatchlistModal()" class="text-gray-300 hover:text-cyan-400 transition"><i class="fa-solid fa-bookmark text-cyan-400"></i> Watchlist</button>`;
+                
+                if (currentUser.isAdmin) {
+                    adminLink.innerHTML = `<button onclick="openAdminModal()" class="text-purple-400 hover:text-purple-300 transition font-semibold"><i class="fa-solid fa-user-shield"></i> Admin Panel</button>`;
+                } else {
+                    adminLink.innerHTML = '';
+                }
+            } else {
+                container.innerHTML = `
+                    <button onclick="openModal('login')" class="px-4 py-2 text-sm font-semibold text-gray-300 hover:text-white transition">Masuk</button>
+                    <button onclick="openModal('register')" class="px-5 py-2 text-sm font-semibold rounded-xl bg-gradient-to-r from-cyan-500 to-purple-600 text-white shadow-lg shadow-cyan-500/20 transition">Daftar</button>
+                `;
+                watchlistLink.innerHTML = '';
+                adminLink.innerHTML = '';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            currentUser = null;
+            updateNavbarUser();
+            fetchMovies();
+            alert('Berhasil keluar akun.');
+        }
+
+        window.onload = () => {
+            fetchMovies();
+            updateNavbarUser();
+        };
+    </script>
+</body>
+</html>
