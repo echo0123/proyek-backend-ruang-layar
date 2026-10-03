@@ -1,6 +1,5 @@
 const express = require('express');
 const cors = require('cors');
-const fetch = require('node-fetch'); // Pastikan node-fetch terpasang atau gunakan native fetch di Node versi terbaru
 const app = express();
 
 app.use(cors());
@@ -42,12 +41,10 @@ let movies = [
 
 // --- ENDPOINT FILM & KATALOG ---
 
-// 1. Ambil daftar semua film
 app.get('/api/movies', (req, res) => {
     res.json(movies);
 });
 
-// 2. Ambil detail film berdasarkan ID
 app.get('/api/movies/:id', (req, res) => {
     const movie = movies.find(m => m.id == req.params.id);
     if (!movie) return res.status(404).json({ error: 'Film tidak ditemukan' });
@@ -56,7 +53,6 @@ app.get('/api/movies/:id', (req, res) => {
 
 // --- ENDPOINT OTENTIKASI (USER & ADMIN) ---
 
-// 3. Register Akun Baru
 app.post('/api/register', (req, res) => {
     const { name, email, password } = req.body;
     const existingUser = users.find(u => u.email === email);
@@ -67,7 +63,6 @@ app.post('/api/register', (req, res) => {
     res.json({ message: 'Registrasi berhasil!', user: newUser });
 });
 
-// 4. Login Akun
 app.post('/api/login', (req, res) => {
     const { email, password } = req.body;
     const user = users.find(u => u.email === email && u.password === password);
@@ -77,7 +72,6 @@ app.post('/api/login', (req, res) => {
 
 // --- ENDPOINT WATCHLIST & ULASAN ---
 
-// 5. Tambah/Hapus Watchlist
 app.post('/api/watchlist', (req, res) => {
     const { email, movieId } = req.body;
     const user = users.find(u => u.email === email);
@@ -94,7 +88,6 @@ app.post('/api/watchlist', (req, res) => {
     }
 });
 
-// 6. Ambil Daftar Watchlist User
 app.get('/api/watchlist/:email', (req, res) => {
     const user = users.find(u => u.email === req.params.email);
     if (!user) return res.status(404).json({ error: 'User tidak ditemukan' });
@@ -102,7 +95,6 @@ app.get('/api/watchlist/:email', (req, res) => {
     res.json(watchlistedMovies);
 });
 
-// 7. Kirim Ulasan Film
 app.post('/api/movies/:id/reviews', (req, res) => {
     const { userName, rating, comment } = req.body;
     const movie = movies.find(m => m.id == req.params.id);
@@ -120,7 +112,6 @@ app.post('/api/movies/:id/reviews', (req, res) => {
 
 // --- ENDPOINT ADMIN & MANAJEMEN KONTEN ---
 
-// 8. Tambah Film Manual
 app.post('/api/admin/movies', (req, res) => {
     const { title, genre, director, cast, image, desc } = req.body;
     const newMovie = {
@@ -138,14 +129,13 @@ app.post('/api/admin/movies', (req, res) => {
     res.json({ message: 'Film berhasil ditambahkan!', movie: newMovie });
 });
 
-// 9. Hapus Film
 app.delete('/api/admin/movies/:id', (req, res) => {
     const id = parseInt(req.params.id);
     movies = movies.filter(m => m.id !== id);
     res.json({ message: 'Film berhasil dihapus!' });
 });
 
-// 10. Impor Film Otomatis dari TMDb API
+// Impor Film Otomatis dari TMDb API (Menggunakan fetch bawaan Node.js)
 app.post('/api/admin/import-tmdb', async (req, res) => {
     const { query } = req.body;
     try {
@@ -180,15 +170,13 @@ app.post('/api/admin/import-tmdb', async (req, res) => {
     }
 });
 
-// --- ENDPOINT STATISTIK TRAFIK & ADMIN (BARU) ---
+// --- ENDPOINT STATISTIK TRAFIK & ADMIN ---
 
-// 11. Catat Kunjungan Halaman (Page Views)
 app.post('/api/track-view', (req, res) => {
     totalPageViews += 1;
     res.json({ success: true, pageViews: totalPageViews });
 });
 
-// 12. Ambil Rekap Data & Statistik Admin
 app.get('/api/admin/stats', (req, res) => {
     const totalMovies = movies ? movies.length : 0;
     const totalUsers = users ? users.length : 0;
@@ -208,7 +196,6 @@ app.get('/api/admin/stats', (req, res) => {
     });
 });
 
-// Menjalankan Server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server backend Ruang Layar berjalan di port ${PORT}`);
