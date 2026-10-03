@@ -1,287 +1,215 @@
 const express = require('express');
 const cors = require('cors');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const fs = require('fs');
-const path = require('path');
-
+const fetch = require('node-fetch'); // Pastikan node-fetch terpasang atau gunakan native fetch di Node versi terbaru
 const app = express();
-const PORT = process.env.PORT || 3000;
-const JWT_SECRET = 'ruang_layar_secret_key_2026';
 
 app.use(cors());
 app.use(express.json());
 
-const DB_FILE = path.join(__dirname, 'database.json');
+// --- DATABASE MEMORI SEMENTARA ---
+let totalPageViews = 1420; // Nilai awal penayangan halaman
 
-function readDB() {
-    if (!fs.existsSync(DB_FILE)) {
-        const initialData = {
-            users: [
-                { 
-                    id: 999, 
-                    name: 'Admin Ruang Layar', 
-                    email: 'admin@ruanglayar.com', 
-                    password: bcrypt.hashSync('admin123', 10), 
-                    isAdmin: true,
-                    watchlist: []
-                }
-            ],
-            movies: [
-                { 
-                    id: 1, 
-                    title: "Chronicles of Neo", 
-                    genre: "Sci-Fi", 
-                    rating: 8.8, 
-                    desc: "Petualangan futuristik menembus dimensi ruang dan waktu demi menyelamatkan peradaban terakhir manusia.", 
-                    director: "Aria Kusuma",
-                    cast: "Reza Rahadian, Marissa Anita",
-                    image: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&q=80&w=600",
-                    reviews: [
-                        { user: "Budi Santoso", rating: 5, comment: "Efek visualnya luar biasa untuk standar film lokal!", date: "2026-10-01" }
-                    ]
-                },
-                { 
-                    id: 2, 
-                    title: "Shadows of Jakarta", 
-                    genre: "Drama", 
-                    rating: 8.2, 
-                    desc: "Misteri konspirasi tingkat tinggi di balik gemerlap malam ibu kota yang mengungkap rahasia kelam.", 
-                    director: "Dimas Anggara",
-                    cast: "Chicco Jerikho, Laura Basuki",
-                    image: "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&q=80&w=600",
-                    reviews: [
-                        { user: "Siti Rahma", rating: 4, comment: "Alur ceritanya menegangkan dari awal sampai akhir.", date: "2026-10-02" }
-                    ]
-                }
-            ]
-        };
-        fs.writeFileSync(DB_FILE, JSON.stringify(initialData, null, 2));
+let users = [
+    { 
+        name: 'Admin Ruang Layar', 
+        email: 'admin@ruanglayar.com', 
+        password: 'adminpassword', 
+        isAdmin: true, 
+        watchlist: [] 
     }
-    return JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
-}
+];
 
-function writeDB(data) {
-    fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
-}
+let movies = [
+    {
+        id: 1,
+        title: 'Interstellar',
+        genre: 'Sci-Fi • Adventure • Drama',
+        director: 'Christopher Nolan',
+        cast: 'Matthew McConaughey, Anne Hathaway, Jessica Chastain',
+        image: 'https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg',
+        desc: 'Petualangan sekelompok astronaut yang memanfaatkan lubang cacing (wormhole) demi mencari planet baru bagi kelangsungan umat manusia.',
+        rating: 8.7,
+        reviews: [
+            { 
+                user: 'Admin Ruang Layar', 
+                rating: 5, 
+                comment: 'Film sci-fi terbaik sepanjang masa dengan visual dan musik yang luar biasa!', 
+                date: '03 Okt 2026' 
+            }
+        ]
+    }
+];
 
-// --- SEO: DYNAMIC SITEMAP.XML ---
-app.get('/sitemap.xml', (req, res) => {
-    const db = readDB();
-    const hostUrl = `${req.protocol}://${req.get('host')}`;
-    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
-    
-    xml += '  <url>\n';
-    xml += `    <loc>${hostUrl}/</loc>\n`;
-    xml += '    <changefreq>daily</changefreq>\n';
-    xml += '    <priority>1.0</priority>\n';
-    xml += '  </url>\n';
+// --- ENDPOINT FILM & KATALOG ---
 
-    db.movies.forEach(movie => {
-        xml += '  <url>\n';
-        xml += `    <loc>${hostUrl}/?movie=${movie.id}</loc>\n`;
-        xml += '    <changefreq>weekly</changefreq>\n';
-        xml += '    <priority>0.8</priority>\n';
-        xml += '  </url>\n';
-    });
-
-    xml += '</urlset>';
-    res.header('Content-Type', 'application/xml');
-    res.send(xml);
-});
-
-// --- SEO: ROBOTS.TXT ---
-app.get('/robots.txt', (req, res) => {
-    const hostUrl = `${req.protocol}://${req.get('host')}`;
-    let robots = 'User-agent: *\n';
-    robots += 'Allow: /\n';
-    robots += `Sitemap: ${hostUrl}/sitemap.xml\n`;
-    res.header('Content-Type', 'text/plain');
-    res.send(robots);
-});
-
-// --- API MOVIES ---
+// 1. Ambil daftar semua film
 app.get('/api/movies', (req, res) => {
-    const db = readDB();
-    res.json(db.movies);
+    res.json(movies);
 });
 
+// 2. Ambil detail film berdasarkan ID
 app.get('/api/movies/:id', (req, res) => {
-    const db = readDB();
-    const movie = db.movies.find(m => m.id == req.params.id);
+    const movie = movies.find(m => m.id == req.params.id);
     if (!movie) return res.status(404).json({ error: 'Film tidak ditemukan' });
     res.json(movie);
 });
 
-// --- API REVIEWS ---
-app.post('/api/movies/:id/reviews', (req, res) => {
-    const { userName, rating, comment } = req.body;
-    const db = readDB();
-    const movie = db.movies.find(m => m.id == req.params.id);
-    if (!movie) return res.status(404).json({ error: 'Film tidak ditemukan' });
+// --- ENDPOINT OTENTIKASI (USER & ADMIN) ---
 
-    const newReview = {
-        user: userName || 'Anonim',
-        rating: Number(rating),
-        comment,
-        date: new Date().toISOString().split('T')[0]
-    };
+// 3. Register Akun Baru
+app.post('/api/register', (req, res) => {
+    const { name, email, password } = req.body;
+    const existingUser = users.find(u => u.email === email);
+    if (existingUser) return res.status(400).json({ error: 'Email sudah terdaftar!' });
 
-    movie.reviews.unshift(newReview);
-    const totalRating = movie.reviews.reduce((acc, r) => acc + r.rating, 0);
-    movie.rating = Number((totalRating / movie.reviews.length).toFixed(1));
-
-    writeDB(db);
-    res.json({ message: 'Ulasan berhasil ditambahkan!', movie });
+    const newUser = { name, email, password, isAdmin: false, watchlist: [] };
+    users.push(newUser);
+    res.json({ message: 'Registrasi berhasil!', user: newUser });
 });
 
-// --- API AUTH ---
-app.post('/api/register', async (req, res) => {
-    try {
-        const { name, email, password } = req.body;
-        const db = readDB();
-        if (db.users.find(u => u.email === email)) {
-            return res.status(400).json({ error: 'Email sudah terdaftar!' });
-        }
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = {
-            id: Date.now(),
-            name,
-            email,
-            password: hashedPassword,
-            isAdmin: false,
-            watchlist: []
-        };
-        db.users.push(newUser);
-        writeDB(db);
-        res.status(201).json({ message: 'Registrasi berhasil!', user: { name, email, isAdmin: false } });
-    } catch (err) {
-        res.status(500).json({ error: 'Terjadi kesalahan server.' });
-    }
+// 4. Login Akun
+app.post('/api/login', (req, res) => {
+    const { email, password } = req.body;
+    const user = users.find(u => u.email === email && u.password === password);
+    if (!user) return res.status(400).json({ error: 'Email atau password salah!' });
+    res.json({ message: 'Berhasil masuk!', user });
 });
 
-app.post('/api/login', async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        const db = readDB();
-        const user = db.users.find(u => u.email === email);
-        if (!user || !(await bcrypt.compare(password, user.password))) {
-            return res.status(400).json({ error: 'Email atau password salah!' });
-        }
-        const token = jwt.sign({ id: user.id, email: user.email, name: user.name, isAdmin: user.isAdmin }, JWT_SECRET, { expiresIn: '7d' });
-        res.json({ 
-            message: 'Login berhasil!', 
-            token, 
-            user: { name: user.name, email: user.email, isAdmin: user.isAdmin, watchlist: user.watchlist || [] } 
-        });
-    } catch (err) {
-        res.status(500).json({ error: 'Terjadi kesalahan server.' });
-    }
-});
+// --- ENDPOINT WATCHLIST & ULASAN ---
 
-// --- API WATCHLIST ---
+// 5. Tambah/Hapus Watchlist
 app.post('/api/watchlist', (req, res) => {
     const { email, movieId } = req.body;
-    const db = readDB();
-    const user = db.users.find(u => u.email === email);
+    const user = users.find(u => u.email === email);
     if (!user) return res.status(404).json({ error: 'User tidak ditemukan' });
 
     if (!user.watchlist) user.watchlist = [];
     const index = user.watchlist.indexOf(movieId);
-    
-    let message = '';
     if (index > -1) {
         user.watchlist.splice(index, 1);
-        message = 'Film dihapus dari Watchlist.';
+        res.json({ message: 'Dihapus dari Watchlist', watchlist: user.watchlist });
     } else {
         user.watchlist.push(movieId);
-        message = 'Film ditambahkan ke Watchlist!';
+        res.json({ message: 'Disimpan ke Watchlist', watchlist: user.watchlist });
     }
-
-    writeDB(db);
-    res.json({ message, watchlist: user.watchlist });
 });
 
+// 6. Ambil Daftar Watchlist User
 app.get('/api/watchlist/:email', (req, res) => {
-    const db = readDB();
-    const user = db.users.find(u => u.email === req.params.email);
+    const user = users.find(u => u.email === req.params.email);
     if (!user) return res.status(404).json({ error: 'User tidak ditemukan' });
-
-    const watchlistMovies = db.movies.filter(m => (user.watchlist || []).includes(m.id));
-    res.json(watchlistMovies);
+    const watchlistedMovies = movies.filter(m => user.watchlist && user.watchlist.includes(m.id));
+    res.json(watchlistedMovies);
 });
 
-// --- API ADMIN: ADD MOVIE ---
-app.post('/api/admin/movies', (req, res) => {
-    const { title, genre, rating, desc, director, cast, image } = req.body;
-    const db = readDB();
+// 7. Kirim Ulasan Film
+app.post('/api/movies/:id/reviews', (req, res) => {
+    const { userName, rating, comment } = req.body;
+    const movie = movies.find(m => m.id == req.params.id);
+    if (!movie) return res.status(404).json({ error: 'Film tidak ditemukan' });
 
+    const newReview = {
+        user: userName,
+        rating: parseInt(rating),
+        comment,
+        date: new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
+    };
+    movie.reviews.push(newReview);
+    res.json({ message: 'Ulasan berhasil dikirim!', reviews: movie.reviews });
+});
+
+// --- ENDPOINT ADMIN & MANAJEMEN KONTEN ---
+
+// 8. Tambah Film Manual
+app.post('/api/admin/movies', (req, res) => {
+    const { title, genre, director, cast, image, desc } = req.body;
     const newMovie = {
-        id: Date.now(),
+        id: movies.length > 0 ? Math.max(...movies.map(m => m.id)) + 1 : 1,
         title,
         genre,
-        rating: Number(rating) || 8.0,
+        director: director || '-',
+        cast: cast || '-',
+        image: image || 'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&q=80&w=500',
         desc,
-        director: director || 'Tidak diketahui',
-        cast: cast || 'Tidak diketahui',
-        image: image || 'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&q=80&w=600',
+        rating: (Math.random() * (9.5 - 7.0) + 7.0).toFixed(1),
         reviews: []
     };
-
-    db.movies.unshift(newMovie);
-    writeDB(db);
-    res.status(201).json({ message: 'Film berhasil ditambahkan!', movie: newMovie });
+    movies.push(newMovie);
+    res.json({ message: 'Film berhasil ditambahkan!', movie: newMovie });
 });
 
-// --- API ADMIN: DELETE MOVIE ---
+// 9. Hapus Film
 app.delete('/api/admin/movies/:id', (req, res) => {
-    const db = readDB();
-    const index = db.movies.findIndex(m => m.id == req.params.id);
-    if (index === -1) return res.status(404).json({ error: 'Film tidak ditemukan' });
-
-    db.movies.splice(index, 1);
-    writeDB(db);
+    const id = parseInt(req.params.id);
+    movies = movies.filter(m => m.id !== id);
     res.json({ message: 'Film berhasil dihapus!' });
 });
 
-// --- API ADMIN: IMPORT FROM TMDB API ---
+// 10. Impor Film Otomatis dari TMDb API
 app.post('/api/admin/import-tmdb', async (req, res) => {
     const { query } = req.body;
     try {
-        const tmdbUrl = `https://api.themoviedb.org/3/search/movie?api_key=2b1573359d9ca7a8c54170366eb9034d&query=${encodeURIComponent(query)}&language=id-ID`;
-        const response = await fetch(tmdbUrl);
+        const url = `https://api.themoviedb.org/3/search/movie?api_key=8265bd1679663a7ea12ac168da84d2e8&language=id-ID&query=${encodeURIComponent(query)}`;
+        const response = await fetch(url);
         const data = await response.json();
 
         if (!data.results || data.results.length === 0) {
-            return res.status(404).json({ error: 'Film tidak ditemukan di TMDb API.' });
+            return res.status(404).json({ error: 'Film tidak ditemukan di TMDb.' });
         }
 
         const item = data.results[0];
-        const db = readDB();
-
-        const importedMovie = {
-            id: Date.now(),
+        const posterPath = item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : 'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&q=80&w=500';
+        
+        const newMovie = {
+            id: movies.length > 0 ? Math.max(...movies.map(m => m.id)) + 1 : 1,
             title: item.title,
-            genre: "Bioskop / Trending",
-            rating: item.vote_average ? Number(item.vote_average.toFixed(1)) : 7.5,
-            desc: item.overview || 'Tidak ada deskripsi.',
-            director: 'TMDb Featured',
-            cast: 'Aktor Global',
-            image: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : 'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&q=80&w=600',
+            genre: 'Bioskop • Terkini',
+            director: 'TMDb Official',
+            cast: 'Pemeran Utama TMDb',
+            image: posterPath,
+            desc: item.overview || 'Sinopsis belum tersedia.',
+            rating: item.vote_average ? item.vote_average.toFixed(1) : '8.0',
             reviews: []
         };
 
-        db.movies.unshift(importedMovie);
-        writeDB(db);
-
-        res.json({ message: `Berhasil mengimpor "${item.title}" dari TMDb API!`, movie: importedMovie });
+        movies.push(newMovie);
+        res.json({ message: `Berhasil mengimpor film: ${item.title}`, movie: newMovie });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Gagal terhubung ke TMDb API.' });
     }
 });
 
+// --- ENDPOINT STATISTIK TRAFIK & ADMIN (BARU) ---
+
+// 11. Catat Kunjungan Halaman (Page Views)
+app.post('/api/track-view', (req, res) => {
+    totalPageViews += 1;
+    res.json({ success: true, pageViews: totalPageViews });
+});
+
+// 12. Ambil Rekap Data & Statistik Admin
+app.get('/api/admin/stats', (req, res) => {
+    const totalMovies = movies ? movies.length : 0;
+    const totalUsers = users ? users.length : 0;
+    
+    let totalReviews = 0;
+    if (movies) {
+        movies.forEach(m => {
+            if (m.reviews) totalReviews += m.reviews.length;
+        });
+    }
+
+    res.json({
+        pageViews: totalPageViews,
+        totalMovies: totalMovies,
+        totalUsers: totalUsers,
+        totalReviews: totalReviews
+    });
+});
+
+// Menjalankan Server
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server Ruang Layar berjalan di http://localhost:${PORT}`);
+    console.log(`Server backend Ruang Layar berjalan di port ${PORT}`);
 });
