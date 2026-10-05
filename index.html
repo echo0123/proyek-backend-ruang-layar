@@ -61,20 +61,11 @@
     <nav class="sticky top-0 z-40 bg-darker/90 backdrop-blur-md border-b border-gray-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
-                <!-- LOGO FUTURISTIK RUANG LAYAR -->
-                <div class="flex items-center space-x-3 cursor-pointer group" onclick="location.reload()">
-                    <div class="relative flex items-center justify-center">
-                        <div class="absolute -inset-1 rounded-xl bg-gradient-to-r from-cyan-500 to-purple-600 opacity-75 blur-sm group-hover:opacity-100 transition duration-300"></div>
-                        <div class="relative w-11 h-11 rounded-xl bg-gray-950 border border-cyan-500/50 flex items-center justify-center shadow-xl">
-                            <!-- Ikon Proyektor / Bingkai Cahaya Sinematik -->
-                            <svg class="w-6 h-6 text-cyan-400 drop-shadow-[0_0_6px_rgba(6,182,212,0.8)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M2 10.5a2.5 2.5 0 0 1 2.5-2.5h15a2.5 2.5 0 0 1 2.5 2.5v3a2.5 2.5 0 0 1-2.5 2.5h-15A2.5 2.5 0 0 1 2 13.5v-3z"></path>
-                                <path d="m10 10.5 5 2.5-5 2.5v-5z"></path>
-                                <path d="M19 8V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v2"></path>
-                            </svg>
-                        </div>
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="location.reload()">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-purple-600 flex items-center justify-center shadow-lg shadow-cyan-500/30">
+                        <i class="fa-solid fa-film text-white text-lg"></i>
                     </div>
-                    <span class="text-2xl font-black tracking-wider bg-gradient-to-r from-cyan-400 via-teal-300 to-purple-400 bg-clip-text text-transparent drop-shadow-sm">
+                    <span class="text-2xl font-black tracking-wider bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
                         RUANG LAYAR
                     </span>
                 </div>
@@ -105,7 +96,7 @@
                 Jelajahi Dunia Film di <span class="bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">Ruang Layar</span>
             </h1>
             <p class="mt-4 text-base sm:text-lg text-gray-400 max-w-xl mx-auto">
-                Cari film favoritmu, simpan ke Watchlist, baca ulasan, dan berikan rating terbaikmu.
+                Cari film favoritmu, tonton secara online, simpan ke Watchlist, dan baca ulasan terbaik.
             </p>
 
             <!-- Search Bar -->
@@ -123,7 +114,7 @@
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 gap-4">
             <div>
                 <h2 class="text-2xl sm:text-3xl font-bold tracking-tight">Daftar Film & Bioskop</h2>
-                <p class="text-gray-400 text-sm mt-1">Pilih film untuk melihat detail, ulasan, atau menyimpan ke Watchlist.</p>
+                <p class="text-gray-400 text-sm mt-1">Pilih film untuk menonton streaming, melihat detail, atau ulasan.</p>
             </div>
             <!-- Genre Filter Tabs -->
             <div class="flex flex-wrap gap-2" id="genre-filters">
@@ -162,26 +153,6 @@
             </button>
             <h2 class="text-2xl font-bold mb-6 flex items-center gap-2"><i class="fa-solid fa-user-shield text-purple-400"></i> Admin Dashboard</h2>
             
-            <!-- KOTAK STATISTIK TRAFIK & DATA -->
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-                <div class="bg-darker p-4 rounded-2xl border border-gray-800 text-center">
-                    <span class="text-xs text-gray-400 block"><i class="fa-solid fa-eye text-cyan-400"></i> Total Tayangan</span>
-                    <span id="stat-views" class="text-xl font-bold text-white mt-1 block">...</span>
-                </div>
-                <div class="bg-darker p-4 rounded-2xl border border-gray-800 text-center">
-                    <span class="text-xs text-gray-400 block"><i class="fa-solid fa-film text-purple-400"></i> Total Film</span>
-                    <span id="stat-movies" class="text-xl font-bold text-white mt-1 block">...</span>
-                </div>
-                <div class="bg-darker p-4 rounded-2xl border border-gray-800 text-center">
-                    <span class="text-xs text-gray-400 block"><i class="fa-solid fa-users text-amber-400"></i> Total User</span>
-                    <span id="stat-users" class="text-xl font-bold text-white mt-1 block">...</span>
-                </div>
-                <div class="bg-darker p-4 rounded-2xl border border-gray-800 text-center">
-                    <span class="text-xs text-gray-400 block"><i class="fa-solid fa-comments text-emerald-400"></i> Total Ulasan</span>
-                    <span id="stat-reviews" class="text-xl font-bold text-white mt-1 block">...</span>
-                </div>
-            </div>
-
             <!-- TMDb API Import Form -->
             <div class="bg-darker p-4 rounded-2xl border border-gray-800 mb-6">
                 <h3 class="font-bold text-sm text-cyan-400 mb-2"><i class="fa-solid fa-cloud-arrow-down"></i> Impor Otomatis dari TMDb API</h3>
@@ -202,7 +173,10 @@
                     <input type="text" id="m-director" placeholder="Sutradara" class="p-3 bg-carddark text-xs text-white rounded-xl border border-gray-700">
                     <input type="text" id="m-cast" placeholder="Pemeran" class="p-3 bg-carddark text-xs text-white rounded-xl border border-gray-700">
                 </div>
-                <input type="text" id="m-image" placeholder="URL Poster Gambar" class="w-full p-3 bg-carddark text-xs text-white rounded-xl border border-gray-700">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <input type="text" id="m-image" placeholder="URL Poster Gambar" class="p-3 bg-carddark text-xs text-white rounded-xl border border-gray-700">
+                    <input type="text" id="m-videoUrl" placeholder="URL Video MP4 (Streaming Link)" class="p-3 bg-carddark text-xs text-white rounded-xl border border-gray-700">
+                </div>
                 <textarea id="m-desc" required placeholder="Sinopsis singkat..." class="w-full p-3 bg-carddark text-xs text-white rounded-xl border border-gray-700" rows="2"></textarea>
                 <button type="submit" class="px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-purple-600 text-white text-xs font-semibold rounded-xl">Simpan Film Baru</button>
             </form>
@@ -292,6 +266,7 @@
                             <span class="absolute top-3 left-3 z-20 px-2.5 py-1 bg-black/60 backdrop-blur-md rounded-lg text-xs font-bold text-amber-400 flex items-center gap-1 border border-white/10">
                                 <i class="fa-solid fa-star"></i> ${movie.rating}
                             </span>
+                            ${movie.videoUrl ? '<span class="absolute bottom-3 right-3 z-20 px-2.5 py-1 bg-cyan-500/90 text-white rounded-lg text-[10px] font-bold shadow"><i class="fa-solid fa-play"></i> Streaming</span>' : ''}
                         </div>
                         <div class="p-5 flex-1 flex flex-col justify-between">
                             <div>
@@ -300,7 +275,7 @@
                                 <p class="text-gray-400 text-xs mt-2 line-clamp-2">${movie.desc}</p>
                             </div>
                             <div class="mt-4 pt-4 border-t border-gray-800 flex justify-between items-center">
-                                <button onclick="openDetail(${movie.id})" class="text-xs text-cyan-400 font-semibold hover:underline">Detail & Ulasan</button>
+                                <button onclick="openDetail(${movie.id})" class="text-xs text-cyan-400 font-semibold hover:underline">Tonton & Detail</button>
                                 ${currentUser ? `
                                     <button onclick="toggleWatchlist(${movie.id})" class="text-xs px-3 py-1.5 rounded-lg border ${isWatchlisted ? 'bg-cyan-500 text-white border-cyan-500' : 'border-gray-700 text-gray-300 hover:border-cyan-400'}">
                                         <i class="fa-solid fa-bookmark"></i> ${isWatchlisted ? 'Disimpan' : 'Watchlist'}
@@ -341,6 +316,21 @@
                 const res = await fetch(`${API_URL}/api/movies/${id}`);
                 const movie = await res.json();
                 const isWatchlisted = currentUser && currentUser.watchlist && currentUser.watchlist.includes(movie.id);
+
+                // Video Streaming Section HTML5 Player
+                const videoSectionHTML = movie.videoUrl ? `
+                    <div class="mt-6 border-t border-gray-800 pt-6">
+                        <h3 class="font-bold text-lg mb-3 flex items-center gap-2 text-cyan-400">
+                            <i class="fa-solid fa-circle-play"></i> Nonton Streaming Online
+                        </h3>
+                        <div class="relative rounded-2xl overflow-hidden bg-black border border-gray-800 shadow-2xl">
+                            <video controls preload="metadata" poster="${movie.image}" class="w-full aspect-video object-cover">
+                                <source src="${movie.videoUrl}" type="video/mp4">
+                                Browser Anda tidak mendukung pemutar video HTML5.
+                            </video>
+                        </div>
+                    </div>
+                ` : `<div class="mt-6 p-4 rounded-2xl bg-darker border border-gray-800 text-center text-xs text-gray-500"><i class="fa-solid fa-video-slash"></i> Video streaming belum tersedia untuk film ini.</div>`;
 
                 let reviewsHTML = movie.reviews.length === 0 ? `<p class="text-xs text-gray-500">Belum ada ulasan.</p>` : '';
                 movie.reviews.forEach(r => {
@@ -397,6 +387,9 @@
                             ` : ''}
                         </div>
                     </div>
+
+                    <!-- Video Streaming Player Integration -->
+                    ${videoSectionHTML}
 
                     <div class="mt-8 border-t border-gray-800 pt-6">
                         <h3 class="font-bold text-lg mb-4">Ulasan Komunitas</h3>
@@ -476,35 +469,12 @@
 
         function openAdminModal() {
             renderAdminMovieList();
-            loadAdminStats();
             document.getElementById('admin-modal').classList.remove('hidden');
         }
 
         function closeAdminModal() {
             document.getElementById('admin-modal').classList.add('hidden');
             fetchMovies();
-        }
-
-        async function trackVisitor() {
-            try {
-                await fetch(`${API_URL}/api/track-view`, { method: 'POST' });
-            } catch (err) {
-                console.error('Gagal mencatat trafik:', err);
-            }
-        }
-
-        async function loadAdminStats() {
-            try {
-                const res = await fetch(`${API_URL}/api/admin/stats`);
-                const stats = await res.json();
-                
-                document.getElementById('stat-views').innerText = stats.pageViews.toLocaleString();
-                document.getElementById('stat-movies').innerText = stats.totalMovies;
-                document.getElementById('stat-users').innerText = stats.totalUsers;
-                document.getElementById('stat-reviews').innerText = stats.totalReviews;
-            } catch (err) {
-                console.error('Gagal memuat statistik admin:', err);
-            }
         }
 
         function renderAdminMovieList() {
@@ -528,6 +498,7 @@
                 director: document.getElementById('m-director').value,
                 cast: document.getElementById('m-cast').value,
                 image: document.getElementById('m-image').value,
+                videoUrl: document.getElementById('m-videoUrl').value,
                 desc: document.getElementById('m-desc').value,
             };
 
@@ -704,7 +675,6 @@
         window.onload = () => {
             fetchMovies();
             updateNavbarUser();
-            trackVisitor();
         };
     </script>
 </body>
